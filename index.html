@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hebraico — primeiros passos</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 18px;
+    background: #f5f5ef;
+    color: #243f36;
+    font-family: Arial, sans-serif;
+  }
+  main { max-width: 540px; margin: auto; }
+  h1 { text-align: center; font-size: 28px; }
+  .intro, .nota {
+    text-align: center;
+    color: #56665f;
+    line-height: 1.6;
+  }
+  .cartao {
+    margin-top: 28px;
+    padding: 28px;
+    border: 1px solid #d6dfd6;
+    border-radius: 20px;
+    background: white;
+    text-align: center;
+  }
+  #contador { color: #56665f; font-size: 14px; }
+  #palavra {
+    font-family: Arial, sans-serif;
+    font-size: 80px;
+    line-height: 1.8;
+    margin: 12px 0;
+  }
+  .resposta { min-height: 110px; padding: 12px 0; }
+  #pronuncia { font-size: 24px; margin: 8px; }
+  #traducao { font-size: 20px; margin: 8px; }
+  button {
+    min-height: 48px;
+    padding: 12px 18px;
+    border: 1px solid #255b46;
+    border-radius: 9px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  #revelar {
+    width: 100%;
+    background: #255b46;
+    color: white;
+  }
+  nav { display: flex; gap: 16px; margin-top: 18px; }
+  nav button { flex: 1; background: white; color: #255b46; }
+  button:focus-visible { outline: 3px solid #c18329; outline-offset: 3px; }
+  .nota { font-size: 14px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Uma palavra de cada vez</h1>
+  <p class="intro">Seus primeiros cartões de hebraico moderno.</p>
+
+  <section class="cartao" aria-label="Cartão de estudo">
+    <p id="contador" aria-live="polite"></p>
+    <div id="palavra" lang="he" dir="rtl"></div>
+
+    <div class="resposta" aria-live="polite">
+      <p id="dica">Tente lembrar o significado.</p>
+      <div id="resposta" hidden>
+        <p id="pronuncia"></p>
+        <p id="traducao"></p>
+      </div>
+    </div>
+
+    <button id="revelar" aria-expanded="false"
+            aria-controls="resposta">Mostrar resposta</button>
+  </section>
+
+  <nav aria-label="Navegação dos cartões">
+    <button id="voltar">← Retornar</button>
+    <button id="avancar">Avançar →</button>
+  </nav>
+
+  <p class="nota">
+    ↻ No último cartão, avançar leva ao primeiro.<br>
+    No primeiro, retornar leva ao último.
+  </p>
+  <p class="nota">
+    <strong>Niqqud:</strong> sinais junto às letras que indicam vogais.<br>
+    <strong>Transliteração:</strong> pronúncia aproximada em letras latinas.
+    Maiúsculas indicam a sílaba mais forte; “sh” soa como “ch” em “chá”.
+  </p>
+</main>
+
+<script>
+  // Cada item contém: hebraico, transliteração e tradução.
+  const palavras = [
+    ["שָׁלוֹם", "sha-LOM", "Olá / paz"],
+    ["תּוֹדָה", "to-DA", "Obrigado / obrigada"],
+    ["כֵּן", "ken", "Sim"],
+    ["לֹא", "lo", "Não"],
+    ["מַיִם", "MA-yim", "Água"]
+  ];
+
+  let posicao = 0;
+  const buscar = id => document.getElementById(id);
+
+  function mostrarCartao() {
+    const palavra = palavras[posicao];
+    buscar("palavra").textContent = palavra[0];
+    buscar("pronuncia").textContent = palavra[1];
+    buscar("traducao").textContent = palavra[2];
+    buscar("contador").textContent =
+      `Cartão ${posicao + 1} de ${palavras.length}`;
+
+    // Cada novo cartão começa com a resposta escondida.
+    buscar("resposta").hidden = true;
+    buscar("dica").hidden = false;
+    buscar("revelar").textContent = "Mostrar resposta";
+    buscar("revelar").setAttribute("aria-expanded", "false");
+  }
+
+  function mover(passo) {
+    // O símbolo % calcula o resto da divisão e cria o loop.
+    posicao = (posicao + passo + palavras.length) % palavras.length;
+    mostrarCartao();
+  }
+
+  buscar("revelar").addEventListener("click", () => {
+    const abrir = buscar("resposta").hidden;
+    buscar("resposta").hidden = !abrir;
+    buscar("dica").hidden = abrir;
+    buscar("revelar").textContent =
+      abrir ? "Ocultar resposta" : "Mostrar resposta";
+    buscar("revelar").setAttribute("aria-expanded", String(abrir));
+  });
+
+  buscar("voltar").addEventListener("click", () => mover(-1));
+  buscar("avancar").addEventListener("click", () => mover(1));
+
+  mostrarCartao();
+</script>
+</body>
+</html>
